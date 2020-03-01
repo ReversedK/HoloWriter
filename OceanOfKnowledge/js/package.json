@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-mde": "^8.0.2",
+    "superagent": "^5.0.6"
+  }
+}
