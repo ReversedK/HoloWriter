@@ -8,6 +8,17 @@ import * as Showdown from "showdown";
 import ReactMde from "react-mde";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import Ook from "../../lib/class.ook.js";
+import PageModel from "./model.page.js"
+
+const converter = new Showdown.Converter({
+  tables: true,
+  simplifiedAutoLink: true,
+  strikethrough: true,
+  tasklists: true
+});
+
+const ook = new Ook();
+ook.setup();
 
 function loadSuggestions(text) {
   return new Promise((accept, reject) => {
@@ -35,54 +46,26 @@ function loadSuggestions(text) {
   });
 }
 
-const converter = new Showdown.Converter({
-  tables: true,
-  simplifiedAutoLink: true,
-  strikethrough: true,
-  tasklists: true
-});
-
-
-
-export class AddPage extends Component {
-  static propTypes = {
-    home: PropTypes.object.isRequired,
-    actions: PropTypes.object.isRequired,
-  };
+export class AddPage extends PageModel {
 
   constructor(props) {
     super(props);
     let ook = new Ook();
     ook.setup();
-    this.setState(
+    this.state = 
       {      
-          lang: '',
-          code: '',
-          title: null,
-          author: "Mike Love",
-          tags: null,
-          page_content: null,  
-          language_list: ook.getLanguageList()
-      });
+        lang: 'Français',
+      code: 'EN_US',
+      title: '',
+      author: "Mike Love",
+      tags: '',
+      page_content: '', 
+      language_list: ook.getLanguageList() || [],
+      selectedLanguage: { code: "EN_US", label: "English" }
+      }
   }
 
-  handleChange = selectedLanguage => {
-    this.setState(
-      { selectedLanguage },
-      () => console.log(`Option selected:`, this.state.selectedLanguage)
-    );
-  };
-
-  handleValueChange = (page_content: string) => {
-    this.setState({ page_content });
-  };
-
-  onTitleChange = title => {
-    this.setState(
-      { title: title.currentTarget.value },
-      () => console.log(`title:`, this.state.title)
-    );
-  }
+  
   onTagsChange = tags => {
     this.setState(
       { tags: tags.currentTarget.value },
@@ -90,26 +73,18 @@ export class AddPage extends Component {
     );
   }
 
-  setSelectedTab = (selectedTab) => {
-    if (selectedTab == "write") selectedTab = "write"; else selectedTab = "preview";
-    this.setState({ selectedTab });
-  };
 
   render() {
-    const { setSelectedTab, language_list, addPagePending, addPageError } = this.props.home;
+    const { addPageResult ,language_list, addPagePending, addPageError } = this.props.home;
     const { addPage } = this.props.actions;
-    const page_content = this.state !== null && this.state.hasOwnProperty('page_content') && this.state.page_content.length ? this.state.page_content : '';
-    const selectedTab = this.state !== null && this.state.hasOwnProperty('selectedTab') && this.state.selectedTab.length ? this.state.selectedTab : '';
-   
-
     return (
       <div className="home-add-page">
-        <Select onChange={this.handleChange} options={language_list} />
-        <input type="text" id="title" placeholder="Title" onChange={(f) => this.onTitleChange(f)} />
+         <Select name="selectedLanguage" onChange={this.handleLangChange} options={language_list} value={this.state.selectedLanguage ||null} />
+        <input type="text" id="title" name="title" placeholder="Title" value={this.state.title} onChange={(value) => this.onChange(value)} />
         <ReactMde
-          value={page_content}
+          value={this.state.page_content}
           onChange={this.handleValueChange}
-          selectedTab={selectedTab}
+          selectedTab={this.state.selectedTab}
           onTabChange={this.setSelectedTab}
           generateMarkdownPreview={markdown =>
             Promise.resolve(converter.makeHtml(markdown))
@@ -117,10 +92,9 @@ export class AddPage extends Component {
           loadSuggestions={loadSuggestions}
         />
         <input type="text" id="tags" onChange={(f) => this.onTagsChange(f)} />
-
         <button className="btn-search" disabled={addPagePending} onClick={() => addPage(this.state)}>
           {addPagePending ? 'Saving...' : 'Save Page'}
-        </button> ;
+        </button>
       </div>
     );
   }

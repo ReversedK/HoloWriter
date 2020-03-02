@@ -27,8 +27,14 @@ export function editPage(args = {}) {
       // See the real-word example at:  https://github.com/supnate/rekit/blob/master/src/features/home/redux/fetchRedditReactjsList.js
       // args.error here is only for test coverage purpose.
       var doRequest;
-      if(args.hasOwnProperty('id')) doRequest = ook.getPage(args.id);
-      else doRequest = ook.updatePage(document.getElementById("page-content").value, args, args.addr);
+
+      try {
+      args.name = document.getElementById("title").value;
+      } catch(e){}
+      
+      if(args.hasOwnProperty('id')) {
+        doRequest = ook.getPage(args.id); 
+      } else doRequest = ook.updatePage(args.page_content, args, args.addr);
       doRequest.then(
         (res) => {         
           dispatch({
@@ -74,9 +80,10 @@ export function reducer(state, action) {
     case HOME_EDIT_PAGE_SUCCESS:
       // The request is success
       let s;
-     console.log(action);
-      if(typeof action.data !== 'undefined' && action.data.hasOwnProperty("item")) s = action.data.item;
+ 
+      if(typeof action.data !== 'undefined' && action.data.hasOwnProperty("item")) s = JSON.parse(action.data.item);
       else s = null;
+      
       return {
         ...state,
         editPageResult : s,
