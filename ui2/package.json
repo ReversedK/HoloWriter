@@ -44,7 +44,7 @@
     "query-string": "^6.11.0",
     "raf": "3.4.0",
     "react": "^16.2.0",
-    "react-dev-utils": "^5.0.0",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.2.0",
     "react-hot-loader": "^4.0.0",
     "react-mde": "^8.0.2",
